@@ -1,6 +1,4 @@
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 
 /*****
@@ -10,11 +8,13 @@ import java.net.Socket;
 public class Client {
     private Socket socket;
     private PrintWriter printWriter;
+    BufferedReader brFromServer;
 
     public static void main(String[] args) {
         Client client = new Client();
         client.initSocket();
-        client.sendMessage("Hello");
+        client.sendMessage("Hello, from client\n");
+        client.listenToServer();
         client.closeSocket();
     }
 
@@ -32,6 +32,17 @@ public class Client {
     private void sendMessage(String message) {
         printWriter.write(message);
         printWriter.flush();
+    }
+
+    private void listenToServer() {
+        try {
+            brFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            String fromServer = null;
+            fromServer = brFromServer.readLine();
+            System.out.println(fromServer);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void closeSocket() {
