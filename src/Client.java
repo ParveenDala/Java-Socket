@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.Socket;
@@ -9,12 +10,12 @@ import java.net.Socket;
 public class Client {
     private Socket socket;
     private PrintWriter printWriter;
-    private OutputStreamWriter outputStreamWriter;
 
     public static void main(String[] args) {
         Client client = new Client();
         client.initSocket();
-        client.sendMessage("Hi");
+        client.sendMessage("Hello");
+        client.closeSocket();
     }
 
     private void initSocket() {
@@ -22,17 +23,22 @@ public class Client {
             String ipAddress = "localhost";
             int portNumber = 8989;
             socket = new Socket(ipAddress, portNumber);
-
-            outputStreamWriter = new OutputStreamWriter(socket.getOutputStream());
-            printWriter = new PrintWriter(outputStreamWriter);
-
+            printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
         } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
 
-    private void sendMessage(String messsage) {
-        printWriter.write(messsage);
+    private void sendMessage(String message) {
+        printWriter.write(message);
+        printWriter.flush();
     }
 
+    private void closeSocket() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
