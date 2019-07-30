@@ -1,7 +1,4 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -25,7 +22,6 @@ public class Server {
             serverSocket = new ServerSocket(portNumber);
             System.out.println("Waiting for client......");
             handleRequest(serverSocket.accept());
-            serverSocket.close();
         } catch (Exception ex) {
             ex.printStackTrace();
         }
@@ -34,15 +30,73 @@ public class Server {
     private void handleRequest(Socket socket) {
         try {
             System.out.println("Received request from client");
-            BufferedReader brFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String dataFromClient = brFromClient.readLine();
-            System.out.println(dataFromClient);
-            PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
-            printWriter.println("Hello from server");
-            printWriter.flush();
-            socket.close();
+            new Thread(new ListenToClient(socket)).start();
+            new Thread(new SendToClient(socket)).start();
         } catch (Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    class SendToClient implements Runnable {
+        private Socket socket;
+
+        public SendToClient(Socket socket) {
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            try {
+                PrintWriter printWriter = new PrintWriter(new OutputStreamWriter(socket.getOutputStream()));
+                BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+                String dataToSend = null;
+                while ((dataToSend = br.readLine()) != null) {
+                    printWriter.write(dataToSend + "\n");
+                    printWriter.flush();
+                    if (dataToSend.equals("stop")) {
+                        closeSocket(socket);
+                        break;
+                    }
+                }
+                System.out.println("SendToClient Done");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    class ListenToClient implements Runnable {
+        private Socket socket;
+
+        public ListenToClient(Socket socket) {
+            this.socket = socket;
+        }
+
+        @Override
+        public void run() {
+            try {
+                BufferedReader brFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                String fromServer = null;
+                while ((fromServer = brFromServer.readLine()) != null) {
+                    System.out.println(fromServer);
+                    if (fromServer.equals("stop")) {
+                        closeSocket(socket);
+                        break;
+                    }
+                }
+                System.out.println("ListenToClient Done");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private void closeSocket(Socket socket) {
+        try {
+            socket.close();
+            System.out.println("Closed");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
