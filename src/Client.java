@@ -18,7 +18,7 @@ public class Client {
     private void initSocket() {
         try {
             String ipAddress = "localhost";
-            int portNumber = 8989;
+            int portNumber = 9999;
             socket = new Socket(ipAddress, portNumber);
         } catch (Exception ex) {
             ex.printStackTrace();
