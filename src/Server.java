@@ -18,7 +18,7 @@ public class Server {
     private void startServer() {
         try {
             System.out.println("Server started");
-            int portNumber = 8989;
+            int portNumber = 9999;
             serverSocket = new ServerSocket(portNumber);
             System.out.println("Waiting for client......");
             handleRequest(serverSocket.accept());
