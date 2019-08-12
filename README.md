@@ -1,2 +1,3 @@
 # Java-Socket
-Java socket client and server
+
+Java Socket with two way client server communication using threads
